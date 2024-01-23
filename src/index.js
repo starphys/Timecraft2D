@@ -16,8 +16,15 @@ class MyGame extends Phaser.Scene
         for(let i = 0; i < 800; i++) {
             let temp = []
             for(let j = 0; j < 600; j++) {
-                if(Phaser.Math.Between(1,30) === 1) {
+                const rand = Phaser.Math.Between(1,30)
+                if(rand === 1) {
                     temp.push(59)
+                }
+                else if (rand < 5){
+                    temp.push(55)
+                }
+                else if (rand < 7) {
+                    temp.push(66)
                 }
                 else {
                     temp.push(12)
@@ -64,9 +71,20 @@ class MyGame extends Phaser.Scene
         })
         
         this.player = this.physics.add.sprite(400,300,"player")
+        this.player.setSize(10,10,true)
         this.cursors = this.input.keyboard.createCursorKeys()
 
-        
+        this.physics.add.collider(this.player,layer)
+        layer.setCollisionBetween(59,60)
+
+        // const debugGraphics = this.add.graphics().setAlpha(0.7)
+        // layer.renderDebug(debugGraphics, {
+        //     tileColor: null,
+        //     collidingTileColor: new Phaser.Display.Color(100,100,100,255),
+        //     faceColor: new Phaser.Display.Color(40, 40, 40, 255)
+        // })
+
+        // this.player.setCollideWorldBounds(true)
     }
 
     update () {
@@ -76,13 +94,16 @@ class MyGame extends Phaser.Scene
         if (this.cursors.left.isDown) {
             this.player.setVelocityX(-160)
             this.player.anims.play('walk-left', true)
-        } else if (this.cursors.right.isDown) {
+        }
+        if (this.cursors.right.isDown) {
             this.player.setVelocityX(160)
             this.player.anims.play('walk-right', true)
-        } else if (this.cursors.up.isDown) {
+        }
+        if (this.cursors.up.isDown) {
             this.player.setVelocityY(-160)
             this.player.anims.play('walk-up', true)
-        } else if (this.cursors.down.isDown) {
+        }
+        if (this.cursors.down.isDown) {
             this.player.setVelocityY(160)
             this.player.anims.play('walk-down', true)
         }
@@ -97,6 +118,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
+            // debug:true,
             gravity: { y: 0 },
         },
     },
