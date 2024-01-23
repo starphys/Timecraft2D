@@ -17,7 +17,8 @@ class MyGame extends Phaser.Scene
             let temp = []
             for(let j = 0; j < 600; j++) {
                 const rand = Phaser.Math.Between(1,30)
-                if(rand === 1) {
+                
+                if (rand === 1) {
                     temp.push(59)
                 }
                 else if (rand < 5){
@@ -91,22 +92,29 @@ class MyGame extends Phaser.Scene
         this.player.setVelocityX(0)
         this.player.setVelocityY(0)
         this.player.anims.stop()
+
+        let x = 0, y = 0
+        const speed = 100
+        
         if (this.cursors.left.isDown) {
-            this.player.setVelocityX(-160)
+            x = -1
             this.player.anims.play('walk-left', true)
         }
         if (this.cursors.right.isDown) {
-            this.player.setVelocityX(160)
+            x = 1
             this.player.anims.play('walk-right', true)
         }
         if (this.cursors.up.isDown) {
-            this.player.setVelocityY(-160)
+            y = -1
             this.player.anims.play('walk-up', true)
         }
         if (this.cursors.down.isDown) {
-            this.player.setVelocityY(160)
+            y = 1
             this.player.anims.play('walk-down', true)
         }
+
+        const mag = Math.sqrt(x*x + y*y || 1)
+        this.player.setVelocity(speed*x/mag, speed*y/mag)
     }
 }
 
