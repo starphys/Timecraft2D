@@ -1,9 +1,12 @@
 import Phaser from 'phaser'
 
+import MapManager from './MapManager'
+
 class MyGame extends Phaser.Scene
 {
     constructor () {
         super()
+        this.mapManager = new MapManager()
     }
 
     preload () {
@@ -12,32 +15,11 @@ class MyGame extends Phaser.Scene
     }
       
     create () {
-        let arr = []
-        for(let i = 0; i < 800; i++) {
-            let temp = []
-            for(let j = 0; j < 600; j++) {
-                const rand = Phaser.Math.Between(1,30)
-                
-                if (rand === 1) {
-                    temp.push(59)
-                }
-                else if (rand < 5){
-                    temp.push(55)
-                }
-                else if (rand < 7) {
-                    temp.push(66)
-                }
-                else {
-                    temp.push(12)
-                }
-            }
-            arr.push(temp)
-        }
-        // 12 for regular, 61 for floating chunk
-        
-        const map = this.make.tilemap({data:arr, tileWidth:16, tileHeight:16})
-        map.addTilesetImage("grass", "grass", 16, 16)
-        const layer = map.createLayer(0,"grass",0,0)
+        // let arr = this.mapManager.generateRandomMap()
+        // const map = this.make.tilemap({data:arr, tileWidth:16, tileHeight:16})
+        // map.addTilesetImage("grass", "grass", 16, 16)
+        // const layer = map.createLayer(0,"grass",0,0)
+        this.mapManager.manage()
 
         // Animation for walking down
         this.anims.create({
@@ -115,7 +97,10 @@ class MyGame extends Phaser.Scene
 
         const mag = Math.sqrt(x*x + y*y || 1)
         this.player.setVelocity(speed*x/mag, speed*y/mag)
+
+        this.mapManager.manage()
     }
+
 }
 
 const config = {

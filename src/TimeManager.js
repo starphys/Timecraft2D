@@ -1,4 +1,4 @@
-class TimeManager {
+export default class TimeManager {
     constructor (startTime, stepSize = 100) {
         this.startTime = startTime
         this.index = 0
