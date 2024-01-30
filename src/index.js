@@ -57,6 +57,7 @@ class MyGame extends Phaser.Scene {
     this.player = this.physics.add.sprite(400, 300, 'player')
     this.player.setSize(10, 10, true)
     this.cursors = this.input.keyboard.createCursorKeys()
+    this.cursors.shift.on('down', () => this.mapManager.stepBack())
 
     this.physics.add.collider(this.player, layer)
     layer.setCollisionBetween(59, 60)

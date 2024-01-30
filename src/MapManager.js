@@ -8,7 +8,7 @@ export default class MapManager {
     this.startTime = Date.now()
     this.index = 0
     this.baseIndex = this.index
-    this.stepSize = 5000
+    this.stepSize = 3000
 
     this.onDrawMap = onDrawMap
   }
@@ -37,11 +37,19 @@ export default class MapManager {
   }
 
   manage () {
-    const delta = Date.now() - (this.startTime + this.stepSize * this.index)
+    // How much time since our last start time
+    const timeDelta = Date.now() - this.startTime
 
-    if (delta < this.stepSize) { return }
+    // How many steps is that in total
+    const stepDelta = Math.floor(timeDelta / this.stepSize)
 
-    this.index += Math.floor(delta / this.stepSize)
+    // Our last base plus that number of steps should be our new index
+    const newIndex = this.baseIndex + stepDelta
+
+    // If our new index is different from our current index, assign and do work, otherwise return
+    if (newIndex === this.index) { return }
+
+    this.index = newIndex
 
     this.updateMapStack()
     this.drawMap()
@@ -85,5 +93,12 @@ export default class MapManager {
 
   setStepSize (newStepSize) {
     this.stepSize = newStepSize
+  }
+
+  stepBack () {
+    this.index = Math.max(this.index - 1, 0)
+    this.startTime = Date.now()
+    this.baseIndex = this.index
+    this.drawMap()
   }
 }
