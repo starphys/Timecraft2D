@@ -1,95 +1,89 @@
 // import TimeManager from './TimeManager'
 
 export default class MapManager {
-    constructor () {
-        // this.timeManager = TimeManager(Clock.now())
-        this.mapStack = []
+  constructor (onDrawMap) {
+    // this.timeManager = TimeManager(Clock.now())
+    this.mapStack = [this.generateRandomMap()]
 
-        this.startTime = Date.now()
-        this.index = 0
-        this.baseIndex = this.index
-        this.stepSize = 1000
+    this.startTime = Date.now()
+    this.index = 0
+    this.baseIndex = this.index
+    this.stepSize = 5000
 
-        this.manage()
-    }
+    this.onDrawMap = onDrawMap
+  }
 
-    generateRandomMap () {
-        let arr = []
-        for(let i = 0; i < 800; i++) {
-            let temp = []
-            for(let j = 0; j < 600; j++) {
-                const rand = Phaser.Math.Between(1,30)
-                
-                if (rand === 1) {
-                    temp.push(59)
-                }
-                else if (rand < 5){
-                    temp.push(55)
-                }
-                else if (rand < 7) {
-                    temp.push(66)
-                }
-                else {
-                    temp.push(12)
-                }
-            }
-            arr.push(temp)
-        }
-        // 12 for regular, 61 for floating chunk
+  generateRandomMap () {
+    const arr = []
+    for (let i = 0; i < 800; i++) {
+      const temp = []
+      for (let j = 0; j < 600; j++) {
+        const rand = Phaser.Math.Between(1, 30)
 
-        return arr
-    }
-
-    manage () {
-        const delta = Date.now() - (this.startTime + this.stepSize * this.index)
-
-        if (delta < this.stepSize) { return }
-
-        this.index += Math.floor(delta / this.stepSize)
-    
-        this.updateMap()
-        this.drawMap()
-    }
-
-    getMap () {
-        // return this.mapStack[this.timeManager.timeIndex]
-    }
-
-    storeMap (index, map) {
-        if (index += this.mapStack.length)
-        {
-            this.mapStack.push(map)
+        if (rand < 4) {
+          temp.push(59)
+        } else if (rand < 5) {
+          temp.push(55)
+        } else if (rand < 7) {
+          temp.push(66)
         } else {
-            this.mapStack[index] = map
+          temp.push(12)
         }
+      }
+      arr.push(temp)
     }
 
-    updateMap () {
-        const mapLen = this.mapStack.length
-        if (this.index < mapLen) { return }
+    return arr
+  }
 
-        for (let i = 0; i < this.index - mapLen; i++) {
-            const map = this.generateRandomMap()
-            this.storeMap(mapLen + 1, map)
-        }
+  manage () {
+    const delta = Date.now() - (this.startTime + this.stepSize * this.index)
+
+    if (delta < this.stepSize) { return }
+
+    this.index += Math.floor(delta / this.stepSize)
+
+    this.updateMapStack()
+    this.drawMap()
+  }
+
+  getMap () {
+    // return this.mapStack[this.timeManager.timeIndex]
+  }
+
+  storeMap (index, map) {
+    if (index <= this.mapStack.length) {
+      this.mapStack.push(map)
+    } else {
+      this.mapStack[index] = map
     }
+  }
 
-    drawMap () {
-        console.log(this.mapStack.length)
+  updateMapStack () {
+    const mapLen = this.mapStack.length
+    if (this.index < mapLen) { return }
+
+    for (let i = 0; i <= this.index - mapLen; i++) {
+      const map = this.generateRandomMap()
+      this.storeMap(mapLen + i, map)
     }
+  }
 
-    updateStartTime (currentTime, newBaseIndex) {
-        this.startTime = currentTime
-        this.baseIndex = newBaseIndex
-    }
+  drawMap () {
+    this.onDrawMap(this.mapStack[this.index])
+  }
 
-    updateTimeIndex (target) {
-        this.index = this.baseIndex + target
-        // Update everything which depends on time
-    }
+  updateStartTime (currentTime, newBaseIndex) {
+    this.startTime = currentTime
+    this.baseIndex = newBaseIndex
+  }
 
-    setStepSize (newStepSize) {
-        this.stepSize = newStepSize
-    }
+  updateTimeIndex (target) {
+    this.index = this.baseIndex + target
+    // Update everything which depends on time
+  }
 
+  setStepSize (newStepSize) {
+    this.stepSize = newStepSize
+  }
 }
