@@ -48,7 +48,7 @@ export default class MapManager {
 
     // If our new index is different from our current index, assign and do work, otherwise return
     if (newIndex === this.index) { return }
-
+    console.log(this.mapStack)
     this.index = newIndex
 
     this.updateMapStack()
@@ -97,7 +97,14 @@ export default class MapManager {
 
   stepBack () {
     this.index = Math.max(this.index - 1, 0)
-    this.startTime = Date.now()
+    this.startTime = Date.now()// If you step backward constantly you actually pause time at the beginning of the map stack
+    this.baseIndex = this.index
+    this.drawMap()
+  }
+
+  stepForward () {
+    this.index = Math.min(this.index + 1, this.mapStack.length - 1)
+    this.startTime = Date.now() // If you step forward constantly you actually pause time at the end of the map stack
     this.baseIndex = this.index
     this.drawMap()
   }
