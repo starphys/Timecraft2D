@@ -77,6 +77,12 @@ class MyGame extends Phaser.Scene {
     this.physics.add.collider(this.player, layer)
     layer.setCollisionBetween(59, 60)
 
+    this.timeIndexText = this.add.text(210, 150, '0', { fontSize: '12px', fill: '#fff' })
+    this.timeDeltaText = this.add.text(210, 170, '0', { fontSize: '12px', fill: '#fff' })
+
+    this.hud = this.add.container(0, 0, [this.timeIndexText, this.timeDeltaText])
+    this.hud.setScrollFactor(0)
+
     // const debugGraphics = this.add.graphics().setAlpha(0.7)
     // layer.renderDebug(debugGraphics, {
     //     tileColor: new Phaser.Display.Color(150, 150, 150, 255),
@@ -114,8 +120,9 @@ class MyGame extends Phaser.Scene {
 
     const mag = Math.sqrt(x * x + y * y || 1)
     this.player.setVelocity(speed * x / mag, speed * y / mag)
-
     this.mapManager.manage()
+    this.timeIndexText.setText(this.mapManager.index)
+    this.timeDeltaText.setText((Date.now() - this.mapManager.startTime) - (this.mapManager.stepSize * (this.mapManager.index - this.mapManager.baseIndex)))
   }
 }
 
