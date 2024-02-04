@@ -7,6 +7,9 @@ Thumbs.db
 *.sublime-workspace
 *.vscode
 
+# Sprite editor files
+/editor_sprites
+
 # Vendors
 node_modules/
 
