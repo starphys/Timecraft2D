@@ -85,7 +85,7 @@ class MyGame extends Phaser.Scene {
 
     // const debugGraphics = this.add.graphics().setAlpha(0.7)
     // layer.renderDebug(debugGraphics, {
-    //     tileColor: new Phaser.Display.Color(150, 150, 150, 255),
+    //     // tileColor: new Phaser.Display.Color(150, 150, 150, 255),
     //     collidingTileColor: new Phaser.Display.Color(100,100,100,255),
     //     faceColor: new Phaser.Display.Color(40, 40, 40, 255)
     // })
@@ -137,6 +137,10 @@ const config = {
       // debug:true,
       gravity: { y: 0 }
     }
+  },
+  render: {
+    mipmapFilter: 'NEAREST',
+    pixelArt: true
   },
   scene: MyGame
 }

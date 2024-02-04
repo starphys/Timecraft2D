@@ -23,10 +23,12 @@ export default class MapManager {
       const rand = Phaser.Math.Between(1, 30)
       if (rand < 4) {
         return 59 // collides
-      } else if (rand < 12) {
+      } else if (rand < 10) {
         return 55 // dark grass
-      } else {
+      } else if (rand < 15) {
         return 66 // light grass
+      } else {
+        return 12
       }
     }))
     return arr
