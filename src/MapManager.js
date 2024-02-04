@@ -1,8 +1,5 @@
-// import TimeManager from './TimeManager'
-
 export default class MapManager {
   constructor (onDrawMap) {
-    // this.timeManager = TimeManager(Clock.now())
     this.mapStack = [this.generateRandomMap()]
 
     this.startTime = Date.now()
@@ -55,10 +52,6 @@ export default class MapManager {
     this.drawMap()
   }
 
-  getMap () {
-    // return this.mapStack[this.timeManager.timeIndex]
-  }
-
   storeMap (index, map) {
     if (index <= this.mapStack.length) {
       this.mapStack.push(map)
@@ -81,14 +74,9 @@ export default class MapManager {
     this.onDrawMap(this.mapStack[this.index])
   }
 
-  updateStartTime (currentTime, newBaseIndex) {
-    this.startTime = currentTime
-    this.baseIndex = newBaseIndex
-  }
-
-  updateTimeIndex (target) {
-    this.index = this.baseIndex + target
-    // Update everything which depends on time
+  updateStartTime () {
+    this.startTime = Date.now()
+    this.baseIndex = this.index
   }
 
   setStepSize (newStepSize) {
@@ -97,15 +85,13 @@ export default class MapManager {
 
   stepBack () {
     this.index = Math.max(this.index - 1, 0)
-    this.startTime = Date.now()// If you step backward constantly you actually pause time at the beginning of the map stack
-    this.baseIndex = this.index
+    this.updateStartTime() // If you step backward constantly you actually pause time at the beginning of the map stack
     this.drawMap()
   }
 
   stepForward () {
     this.index = Math.min(this.index + 1, this.mapStack.length - 1)
-    this.startTime = Date.now() // If you step forward constantly you actually pause time at the end of the map stack
-    this.baseIndex = this.index
+    this.updateStartTime() // If you step forward constantly you actually pause time at the end of the map stack
     this.drawMap()
   }
 }
