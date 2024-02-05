@@ -10,7 +10,8 @@ class MyGame extends Phaser.Scene {
     this.pixelWidth = 16 * this.tileWidth
     this.pixelHeight = 16 * this.tileWidth
 
-    this.mapManager = new MapManager(this.tileWidth, this.tileHeight, (matrix) => matrix.forEach((arr, i) => arr.forEach((e, j) => this.layer.putTileAt(e, i, j))))
+    const onDrawMap = (matrix) => matrix.forEach((arr, i) => arr.forEach((e, j) => this.layer.putTileAt(e, i, j)))
+    this.mapManager = new MapManager(this.tileWidth, this.tileHeight, onDrawMap)
 
     window.scene = this
   }
@@ -21,16 +22,56 @@ class MyGame extends Phaser.Scene {
   }
 
   create () {
-    const map = this.make.tilemap({ tileWidth: 16, tileHeight: 16 })
-    map.addTilesetImage('grass', 'grass', 16, 16)
-    const layer = map.createBlankLayer('ground', 'grass', 0, 0, this.tileWidth, this.tileHeight)
+    this.initWorld()
+    this.initPlayer()
+    this.initView() //TODO: better function name?
+  }
+
+  update () {
+    this.player.setVelocityX(0)
+    this.player.setVelocityY(0)
+    this.player.anims.stop()
+
+    let x = 0; let y = 0
+    const speed = 100
+
+    if (this.cursorKeys.left.isDown) {
+      x = -1
+      this.player.anims.play('walk-left', true)
+    }
+    if (this.cursorKeys.right.isDown) {
+      x = 1
+      this.player.anims.play('walk-right', true)
+    }
+    if (this.cursorKeys.up.isDown) {
+      y = -1
+      this.player.anims.play('walk-up', true)
+    }
+    if (this.cursorKeys.down.isDown) {
+      y = 1
+      this.player.anims.play('walk-down', true)
+    }
+
+    const mag = Math.sqrt(x * x + y * y || 1)
+    this.player.setVelocity(speed * x / mag, speed * y / mag)
+    this.mapManager.manage()
+    this.timeIndexText.setText(this.mapManager.index)
+    this.timeDeltaText.setText((Date.now() - this.mapManager.startTime) - (this.mapManager.stepSize * (this.mapManager.index - this.mapManager.baseIndex)))
+  }
+
+  initWorld() {
+    this.tilemap = this.make.tilemap({ tileWidth: 16, tileHeight: 16 })
+    this.tilemap.addTilesetImage('grass', 'grass', 16, 16)
+    const layer = this.tilemap.createBlankLayer('ground', 'grass', 0, 0, this.tileWidth, this.tileHeight)
     this.layer = layer
 
     this.physics.world.setBounds(0, 0, this.pixelWidth, this.pixelHeight)
 
     this.mapManager.manage()
     this.mapManager.drawMap()
+  }
 
+  initPlayer() {
     // Animation for walking down
     this.anims.create({
       key: 'walk-down',
@@ -66,16 +107,19 @@ class MyGame extends Phaser.Scene {
     this.player = this.physics.add.sprite(Math.round(this.pixelWidth / 2), Math.round(this.pixelHeight / 2), 'player')
     this.player.setSize(10, 10, true)
     this.player.setCollideWorldBounds(this.pixelWidth, this.pixelHeight)
-    this.cursors = this.input.keyboard.createCursorKeys()
-    this.cursors.shift.on('down', () => this.mapManager.stepBack())
-    this.cursors.space.on('down', () => this.mapManager.stepForward())
 
+    this.cursorKeys = this.input.keyboard.createCursorKeys()
+    this.cursorKeys.shift.on('down', () => this.mapManager.stepBack())
+    this.cursorKeys.space.on('down', () => this.mapManager.stepForward())
+
+    this.physics.add.collider(this.player, this.layer)
+    this.layer.setCollisionBetween(59, 60)
+  }
+
+  initView() {
     this.cameras.main.setBounds(0, 0, this.pixelWidth, this.pixelHeight)
     this.cameras.main.startFollow(this.player, false, 1, 1, 0, 0)
     this.cameras.main.setZoom(2)
-
-    this.physics.add.collider(this.player, layer)
-    layer.setCollisionBetween(59, 60)
 
     this.timeIndexText = this.add.text(210, 150, '0', { fontSize: '12px', fill: '#fff' })
     this.timeDeltaText = this.add.text(210, 170, '0', { fontSize: '12px', fill: '#fff' })
@@ -89,40 +133,6 @@ class MyGame extends Phaser.Scene {
     //     collidingTileColor: new Phaser.Display.Color(100,100,100,255),
     //     faceColor: new Phaser.Display.Color(40, 40, 40, 255)
     // })
-
-    // this.player.setCollideWorldBounds(true)
-  }
-
-  update () {
-    this.player.setVelocityX(0)
-    this.player.setVelocityY(0)
-    this.player.anims.stop()
-
-    let x = 0; let y = 0
-    const speed = 100
-
-    if (this.cursors.left.isDown) {
-      x = -1
-      this.player.anims.play('walk-left', true)
-    }
-    if (this.cursors.right.isDown) {
-      x = 1
-      this.player.anims.play('walk-right', true)
-    }
-    if (this.cursors.up.isDown) {
-      y = -1
-      this.player.anims.play('walk-up', true)
-    }
-    if (this.cursors.down.isDown) {
-      y = 1
-      this.player.anims.play('walk-down', true)
-    }
-
-    const mag = Math.sqrt(x * x + y * y || 1)
-    this.player.setVelocity(speed * x / mag, speed * y / mag)
-    this.mapManager.manage()
-    this.timeIndexText.setText(this.mapManager.index)
-    this.timeDeltaText.setText((Date.now() - this.mapManager.startTime) - (this.mapManager.stepSize * (this.mapManager.index - this.mapManager.baseIndex)))
   }
 }
 
