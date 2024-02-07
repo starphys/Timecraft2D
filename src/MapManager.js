@@ -1,5 +1,8 @@
 export default class MapManager {
-  constructor (onDrawMap) {
+  constructor (width, height, onDrawMap) {
+    this.width = width
+    this.height = height
+
     this.mapStack = [this.generateRandomMap()]
 
     this.startTime = Date.now()
@@ -11,26 +14,32 @@ export default class MapManager {
   }
 
   generateRandomMap () {
-    const arr = []
-    for (let i = 0; i < 800; i++) {
-      const temp = []
-      for (let j = 0; j < 600; j++) {
-        const rand = Phaser.Math.Between(1, 30)
-
-        if (rand < 4) {
-          temp.push(59)
-        } else if (rand < 5) {
-          temp.push(55)
-        } else if (rand < 7) {
-          temp.push(66)
-        } else {
-          temp.push(12)
-        }
+    const { xLower, xUpper, yLower, yUpper } = this.spawnBoxBounds()
+    const arr = Array(this.width).fill(0).map((_, i) => Array(this.height).fill(0).map((_, j) => {
+      if ((i >= xLower && i <= xUpper) && (j >= yLower && j <= yUpper)) {
+        return 12
       }
-      arr.push(temp)
-    }
 
+      const rand = Phaser.Math.Between(1, 30)
+      if (rand < 4) {
+        return 59 // collides
+      } else if (rand < 10) {
+        return 55 // dark grass
+      } else if (rand < 15) {
+        return 66 // light grass
+      } else {
+        return 12
+      }
+    }))
     return arr
+  }
+
+  spawnBoxBounds () {
+    const centerX = Math.round(this.width / 2) - 1
+    const centerY = Math.round(this.height / 2) - 1
+    const radiusX = Math.round(this.width / 20) || 1
+    const radiusY = Math.round(this.height / 20) || 1
+    return { xLower: centerX - radiusX, xUpper: centerX + radiusX, yLower: centerY - radiusY, yUpper: centerY + radiusY }
   }
 
   manage () {
@@ -45,7 +54,6 @@ export default class MapManager {
 
     // If our new index is different from our current index, assign and do work, otherwise return
     if (newIndex === this.index) { return }
-    console.log(this.mapStack)
     this.index = newIndex
 
     this.updateMapStack()

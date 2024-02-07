@@ -5,7 +5,14 @@ import MapManager from './MapManager'
 class MyGame extends Phaser.Scene {
   constructor () {
     super()
-    this.mapManager = new MapManager((matrix) => matrix.forEach((arr, i) => arr.forEach((e, j) => this.layer.putTileAt(e, i, j))))
+    this.tileWidth = 49
+    this.tileHeight = 49
+    this.pixelWidth = 16 * this.tileWidth
+    this.pixelHeight = 16 * this.tileWidth
+
+    this.mapManager = new MapManager(this.tileWidth, this.tileHeight, (matrix) => matrix.forEach((arr, i) => arr.forEach((e, j) => this.layer.putTileAt(e, i, j))))
+
+    window.scene = this
   }
 
   preload () {
@@ -16,8 +23,10 @@ class MyGame extends Phaser.Scene {
   create () {
     const map = this.make.tilemap({ tileWidth: 16, tileHeight: 16 })
     map.addTilesetImage('grass', 'grass', 16, 16)
-    const layer = map.createBlankLayer('ground', 'grass', 0, 0, 800, 600)
+    const layer = map.createBlankLayer('ground', 'grass', 0, 0, this.tileWidth, this.tileHeight)
     this.layer = layer
+
+    this.physics.world.setBounds(0, 0, this.pixelWidth, this.pixelHeight)
 
     this.mapManager.manage()
     this.mapManager.drawMap()
@@ -54,18 +63,29 @@ class MyGame extends Phaser.Scene {
       repeat: -1
     })
 
-    this.player = this.physics.add.sprite(400, 300, 'player')
+    this.player = this.physics.add.sprite(Math.round(this.pixelWidth / 2), Math.round(this.pixelHeight / 2), 'player')
     this.player.setSize(10, 10, true)
+    this.player.setCollideWorldBounds(this.pixelWidth, this.pixelHeight)
     this.cursors = this.input.keyboard.createCursorKeys()
     this.cursors.shift.on('down', () => this.mapManager.stepBack())
     this.cursors.space.on('down', () => this.mapManager.stepForward())
 
+    this.cameras.main.setBounds(0, 0, this.pixelWidth, this.pixelHeight)
+    this.cameras.main.startFollow(this.player, false, 1, 1, 0, 0)
+    this.cameras.main.setZoom(2)
+
     this.physics.add.collider(this.player, layer)
     layer.setCollisionBetween(59, 60)
 
+    this.timeIndexText = this.add.text(210, 150, '0', { fontSize: '12px', fill: '#fff' })
+    this.timeDeltaText = this.add.text(210, 170, '0', { fontSize: '12px', fill: '#fff' })
+
+    this.hud = this.add.container(0, 0, [this.timeIndexText, this.timeDeltaText])
+    this.hud.setScrollFactor(0)
+
     // const debugGraphics = this.add.graphics().setAlpha(0.7)
     // layer.renderDebug(debugGraphics, {
-    //     tileColor: null,
+    //     // tileColor: new Phaser.Display.Color(150, 150, 150, 255),
     //     collidingTileColor: new Phaser.Display.Color(100,100,100,255),
     //     faceColor: new Phaser.Display.Color(40, 40, 40, 255)
     // })
@@ -100,8 +120,9 @@ class MyGame extends Phaser.Scene {
 
     const mag = Math.sqrt(x * x + y * y || 1)
     this.player.setVelocity(speed * x / mag, speed * y / mag)
-
     this.mapManager.manage()
+    this.timeIndexText.setText(this.mapManager.index)
+    this.timeDeltaText.setText((Date.now() - this.mapManager.startTime) - (this.mapManager.stepSize * (this.mapManager.index - this.mapManager.baseIndex)))
   }
 }
 
@@ -116,6 +137,10 @@ const config = {
       // debug:true,
       gravity: { y: 0 }
     }
+  },
+  render: {
+    mipmapFilter: 'NEAREST',
+    pixelArt: true
   },
   scene: MyGame
 }
