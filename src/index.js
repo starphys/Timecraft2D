@@ -10,7 +10,7 @@ class MyGame extends Phaser.Scene {
     this.pixelWidth = 16 * this.tileWidth
     this.pixelHeight = 16 * this.tileWidth
 
-    const onDrawMap = (matrix) => matrix.forEach((arr, i) => arr.forEach((e, j) => this.layer.putTileAt(e, i, j)))
+    const onDrawMap = (matrix) => matrix.forEach((arr, i) => arr.forEach((e, j) => this.groundLayer.putTileAt(e, i, j)))
     this.mapManager = new MapManager(this.tileWidth, this.tileHeight, onDrawMap)
 
     window.scene = this
@@ -19,12 +19,26 @@ class MyGame extends Phaser.Scene {
   preload () {
     this.load.image('grass', 'assets/tiles/Grass.png')
     this.load.spritesheet('player', 'assets/sprites/Basic Charakter Spritesheet.png', { frameWidth: 48, frameHeight: 48 })
+    this.load.spritesheet('apple', 'assets/sprites/Apple_1_White_Outline.png', { frameWidth: 16, frameHeight: 16 })
   }
 
   create () {
     this.initWorld()
     this.initPlayer()
     this.initView() //TODO: better function name?
+
+    this.anims.create({
+      key: 'decay',
+      frames: this.anims.generateFrameNumbers('apple', { start: 0, end: 3 }),
+      frameRate: 10,
+      repeat: 1
+    })
+
+    this.input.on('pointerdown', () => {
+      const tile = this.tilemap.getTileAtWorldXY(this.input.mousePointer.x, this.input.mousePointer.y)
+      console.log(tile.x, tile.y)
+      const apple = this.physics.add.sprite(tile.x, tile.y, 'apple')
+    })
   }
 
   update () {
@@ -62,8 +76,11 @@ class MyGame extends Phaser.Scene {
   initWorld() {
     this.tilemap = this.make.tilemap({ tileWidth: 16, tileHeight: 16 })
     this.tilemap.addTilesetImage('grass', 'grass', 16, 16)
-    const layer = this.tilemap.createBlankLayer('ground', 'grass', 0, 0, this.tileWidth, this.tileHeight)
-    this.layer = layer
+
+    const groundLayer = this.tilemap.createBlankLayer('ground', 'grass', 0, 0, this.tileWidth, this.tileHeight)
+    this.groundLayer = groundLayer
+
+    // const appleLayer = this.tilemap.createBlankLayer('apples')
 
     this.physics.world.setBounds(0, 0, this.pixelWidth, this.pixelHeight)
 
@@ -112,8 +129,8 @@ class MyGame extends Phaser.Scene {
     this.cursorKeys.shift.on('down', () => this.mapManager.stepBack())
     this.cursorKeys.space.on('down', () => this.mapManager.stepForward())
 
-    this.physics.add.collider(this.player, this.layer)
-    this.layer.setCollisionBetween(59, 60)
+    this.physics.add.collider(this.player, this.groundLayer)
+    this.groundLayer.setCollisionBetween(59, 60)
   }
 
   initView() {

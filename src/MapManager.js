@@ -8,7 +8,7 @@ export default class MapManager {
     this.startTime = Date.now()
     this.index = 0
     this.baseIndex = this.index
-    this.stepSize = 3000
+    this.stepSize = 300000 //FIXME: revert
 
     this.onDrawMap = onDrawMap
   }
