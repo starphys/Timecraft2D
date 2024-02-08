@@ -21,7 +21,7 @@ export default class MapManager {
       }
 
       const rand = Phaser.Math.Between(1, 30)
-      if (rand < 4) {
+      if (rand < 9) {
         return 59 // collides
       } else if (rand < 10) {
         return 55 // dark grass
@@ -53,28 +53,25 @@ export default class MapManager {
     const newIndex = this.baseIndex + stepDelta
 
     // If our new index is different from our current index, assign and do work, otherwise return
-    if (newIndex === this.index) { return }
-    this.index = newIndex
+    if (newIndex !== this.index) {
+      this.updateMapStack(newIndex)
+      this.index = newIndex
+    }
 
-    this.updateMapStack()
     this.drawMap()
   }
 
   storeMap (index, map) {
-    if (index <= this.mapStack.length) {
+    if (index >= this.mapStack.length) {
       this.mapStack.push(map)
     } else {
       this.mapStack[index] = map
     }
   }
 
-  updateMapStack () {
-    const mapLen = this.mapStack.length
-    if (this.index < mapLen) { return }
-
-    for (let i = 0; i <= this.index - mapLen; i++) {
-      const map = this.generateRandomMap()
-      this.storeMap(mapLen + i, map)
+  updateMapStack (newIndex) {
+    for (let i = 1; this.index + i <= newIndex; i++) {
+      this.storeMap(this.index + i, JSON.parse(JSON.stringify(this.mapStack[this.index])))
     }
   }
 
@@ -101,5 +98,13 @@ export default class MapManager {
     this.index = Math.min(this.index + 1, this.mapStack.length - 1)
     this.updateStartTime() // If you step forward constantly you actually pause time at the end of the map stack
     this.drawMap()
+  }
+
+  mutateTile (x, y, playerEquip) {
+    if (x < 0 || x >= this.width || y < 0 || y >= this.height) { return }
+    const tile = this.mapStack[this.index][x][y]
+    if (tile === 59 && playerEquip < 0) {
+      this.mapStack[this.index][x][y] = 62
+    }
   }
 }
